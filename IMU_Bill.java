@@ -1,4 +1,4 @@
- package org.firstinspires.ftc.teamcode;
+    package org.firstinspires.ftc.teamcode;
 
  import com.acmerobotics.dashboard.FtcDashboard;
  import com.acmerobotics.dashboard.canvas.Canvas;
@@ -95,20 +95,31 @@
         telemetry.addData("3 correction", correction);
         telemetry.addData("X:",up.pose.getTranslation().getX() / 0.0254);
         telemetry.addData("Y:",up.pose.getTranslation().getY() / 0.0254);
+        telemetry.addData("Pheta:",up.pose.getRotation().getDegrees());
         telemetry.update();
         //telemetry.update();
 
         waitForStart();
 
         correction = checkDirection();
+
         driveForwardIMU(0.4,5);
         while(opModeIsActive())
         {
             telemetry.addData("X:",up.pose.getTranslation().getX() / 0.0254);
             telemetry.addData("Y:",up.pose.getTranslation().getY() / 0.0254);
+            telemetry.addData("Pheta:",up.pose.getRotation().getDegrees());
             telemetry.update();
+            if(gamepad1.a)
+            {
+                Correction2(39,74,0);
+            }
             loop1();
-            Correction(0,0);
+            //Correction(1,1);
+        }
+        if(!opModeIsActive())
+        {
+            slamra.stop();
         }
 
 
@@ -623,10 +634,11 @@
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         if(distance > 0) {
             while (frontLeft.isBusy() && frontRight.isBusy() && backRight.isBusy() && backLeft.isBusy()) {
-                frontLeft.setPower(power);
-                frontRight.setPower(power);
-                backLeft.setPower(power);
-                backRight.setPower(power);
+                frontLeft.setPower(power-correction);
+                frontRight.setPower(power-correction);
+                backLeft.setPower(power-correction);
+                backRight.setPower(power-correction);
+                correction = checkDirection();
             }
         }else {
 
@@ -694,7 +706,42 @@
         }
 
     }
-    public void stop(double power, int inches)
+     public void splineFL2(double power, int inches) {
+        int ticks = (int) (inches*383.6/(50/25.4*2*Math.PI));
+
+         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+         frontRight.setTargetPosition(ticks);
+         backLeft.setTargetPosition(ticks);
+         frontLeft.setTargetPosition(-ticks/2);
+         backRight.setTargetPosition(-ticks/2);
+
+         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+         if (ticks > 16) {
+             while (frontRight.isBusy() && backLeft.isBusy()) {
+
+                 frontRight.setPower(power - correction);
+                 backLeft.setPower(power + correction);
+                 frontLeft.setPower((power*0.5) + correction);
+                 backRight.setPower((power*0.5) - correction);
+                 correction = checkDirection();
+
+             }
+         }
+         // reset angle tracking on new heading.
+         resetAngle();
+
+
+     }
+
+     public void stop(double power, int inches)
     {
         int distance = (int) (57.580322 * inches - 21.521799);
 
@@ -741,6 +788,15 @@
          double temp1 = up.pose.getTranslation().getX() / 0.0254-y;
          double hype = (Math.pow(temp,2))+(Math.pow(temp1,2));
          double distance = Math.sqrt(hype);
+         if(distance!=0)
+         {
+
+         }
+
+
+
+         Rotation2d pog = up.pose.getRotation();
+         int potato = (int) pog.getDegrees();
          if(temp>0)
          {
              strafeLeft(.3,temp);
@@ -748,19 +804,28 @@
              //diagnolRight(.3,distance);
 
          }
-         else if(temp1>0)
+           if(temp1>0)
          {
              driveBackwardIMU(.3,temp1);
          }
-         else if (temp<0)
+           if (temp<0)//add else if stuff if we wanna adjsut correction
          {
              strafeRightIMU(.3,temp*-1);
 
          }
-         else if(temp1<0)
+           if(temp1<0)
          {
              driveForwardIMU(.3,temp1*-1);
          }
+           if (potato>0&&potato<90)
+          {
+              rotate(.3,potato*-1);
+          }
+//         if (potato<-2&&potato>-90)//pheta goes to negative degrees, add a buffer.
+//         {
+//             rotate(.2,potato*-1);
+//         }
+
          //else if(temp<0&&temp1>0)
          //{
          //  strafeRight(.3,temp*-1);
@@ -781,6 +846,84 @@
 
 
      }
+     public void Correction2(double x, double y,double pheta)
+     {
+
+         T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
+         if (up == null) return;
+         //
+         int distance = 0;
+         //Get the distance we need to move based on x and Y
+         double X = (int) (up.pose.getTranslation().getX() / 0.0254)-(x);
+         double Y = (int) (up.pose.getTranslation().getY() / 0.0254)-(y);
+         //rotate caclculations
+         Rotation2d getRotate = up.pose.getRotation();
+         int Rotation = (int) getRotate.getDegrees();
+         int RotateCorrect= (int) (Rotation-pheta);
+         //math for Diagonal travel
+         double hype = (int)(Math.pow(X,2))+(Math.pow(Y,2));
+         if(hype>0)
+         {
+             distance = (int) (Math.sqrt(hype));
+         }
+         //rotate travel
+         if(RotateCorrect>0)
+         {
+            rotate(.3,RotateCorrect*-1);
+         }
+         if(RotateCorrect<0)
+         {
+             rotate(.3,RotateCorrect);
+         }
+         //Diagonal travel
+         if(distance!=0)
+         {
+             if(X<0&&Y>0)
+             {
+                 splineFL2(.3,distance);
+             }
+             if(X<0&&Y<0)
+             {
+                 splineBL(.3,distance);
+             }
+             if(X>0&&Y<0)
+             {
+                 splineFR(.3,distance);
+             }
+             if(X>0&&Y>0)
+             {
+                 splineBR(.3,distance);
+             }
+
+         }
+         //no Diagonal travel
+         else
+             {
+                 if(X<0)
+                 {
+                     strafeLeft(.3,X*-1);
+                 }
+                 if(X>0)
+                 {
+                     strafeRightIMU(.3,X);
+                 }
+                 if(Y>0)
+                 {
+                     driveForwardIMU(.3,Y);
+                 }
+                 if(Y<0)
+                 {
+                     driveBackwardIMU(.3,Y*-1);
+                 }
+
+             }
+
+     }
+
+
+
+
+
      public void loop1()
      {
          final int robotRadius = 9; // inches
