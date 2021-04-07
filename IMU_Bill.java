@@ -114,7 +114,7 @@
             {
                 Correction2(39,74,0);
             }
-            loop1();
+            updateFieldPos();
             //Correction(1,1);
         }
         if(!opModeIsActive())
@@ -579,7 +579,6 @@
 
     }
 
-
     public void strafeRight(double power, int inches) {
         int distance = (int) (57.580322 * inches - 21.521799);
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -867,64 +866,51 @@
              distance = (int) (Math.sqrt(hype));
          }
          //rotate travel
-         if(RotateCorrect>0)
-         {
-            rotate(.3,RotateCorrect*-1);
-         }
-         if(RotateCorrect<0)
-         {
-             rotate(.3,RotateCorrect);
-         }
-         //Diagonal travel
-         if(distance!=0)
-         {
-             if(X<0&&Y>0)
+         while (X!=0||Y!=0||RotateCorrect!=0) {
+             if (RotateCorrect > 0)//should i add a while loop??????
              {
-                 splineFL2(.3,distance);
+                 rotate(.3, RotateCorrect * -1);
              }
-             if(X<0&&Y<0)
-             {
-                 splineBL(.3,distance);
+             if (RotateCorrect < 0) {
+                 rotate(.3, RotateCorrect);
              }
-             if(X>0&&Y<0)
-             {
-                 splineFR(.3,distance);
-             }
-             if(X>0&&Y>0)
-             {
-                 splineBR(.3,distance);
-             }
-
-         }
-         //no Diagonal travel
-         else
-             {
-                 if(X<0)
-                 {
-                     strafeLeft(.3,X*-1);
+             //Diagonal travel
+             if (distance != 0) {
+                 if (X < 0 && Y > 0) {
+                     splineFL2(.3, distance);
                  }
-                 if(X>0)
-                 {
-                     strafeRightIMU(.3,X);
+                 if (X < 0 && Y < 0) {
+                     splineBL(.3, distance);
                  }
-                 if(Y>0)
-                 {
-                     driveForwardIMU(.3,Y);
+                 if (X > 0 && Y < 0) {
+                     splineFR(.3, distance);
                  }
-                 if(Y<0)
-                 {
-                     driveBackwardIMU(.3,Y*-1);
+                 if (X > 0 && Y > 0) {
+                     splineBR(.3, distance);
                  }
 
              }
+             //no Diagonal travel
+             else {
+                 if (X < 0) {
+                     strafeLeft(.3, X * -1);
+                 }
+                 if (X > 0) {
+                     strafeRightIMU(.3, X);
+                 }
+                 if (Y > 0) {
+                     driveForwardIMU(.3, Y);
+                 }
+                 if (Y < 0) {
+                     driveBackwardIMU(.3, Y * -1);
+                 }
+
+             }
+         }
 
      }
 
-
-
-
-
-     public void loop1()
+     public void updateFieldPos()
      {
          final int robotRadius = 9; // inches
 
