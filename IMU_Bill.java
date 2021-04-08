@@ -879,24 +879,25 @@
              //Diagonal travel
              if (distance != 0) {
                  if (X < 0 && Y > 0) {
-                     splineFL2(.3, distance);//this doesnt work
+                     splineBR(.3, distance);//this doesnt work Switched to FL2(back need to be tested)
                  }
-                 if (X < 0 && Y < 0) {
-                     splineFR(.3, distance);//BL
+                 if (X < 0 && Y < 0) {//dont touch condition
+                     splineFR(.3, distance);//this only works
                  }
-                 if (X > 0 && Y < 0) {
-                     splineBL(.3, distance);//FR
+                 if (X > 0 && Y < 0) {//dont touch condition
+                     splineBL(.3, distance);//this also works(back need to be tested)
                  }
                  if (X > 0 && Y > 0) {
-                     splineBR(.3, distance);
-                 }
+                     splineFL2(.3, distance);//does this work, switched to BR
+                 }//if pi = 3.14 does pie also = 3.14
 
              }
-             //if (RotateCorrect > 3)//should i add a while loop??????
+//             if (RotateCorrect > 0)
+
 //             {
 //                 rotate(.3, RotateCorrect * -1);
 //             }
-//             if (RotateCorrect < -3) {
+//             if (RotateCorrect < 0) {
 //                 rotate(.3, RotateCorrect);
 //             }
              //no Diagonal travel
