@@ -110,10 +110,12 @@
             telemetry.addData("Y:",up.pose.getTranslation().getY() / 0.0254);
             telemetry.addData("Pheta:",up.pose.getRotation().getDegrees());
             telemetry.update();
-            if(gamepad1.a)
-            {
-                Correction2(39,74,0);
-            }
+//            if(gamepad1.a)
+//            {
+//                Correction2(39,74,0);
+//            }
+
+           Correction2(0,0,0);
             updateFieldPos();
             //Correction(1,1);
         }
@@ -866,30 +868,37 @@
              distance = (int) (Math.sqrt(hype));
          }
          //rotate travel
-         while (X!=0||Y!=0||RotateCorrect!=0) {
-             if (RotateCorrect > 0)//should i add a while loop??????
-             {
-                 rotate(.3, RotateCorrect * -1);
-             }
-             if (RotateCorrect < 0) {
-                 rotate(.3, RotateCorrect);
-             }
+         //while (X!=0||Y!=0||RotateCorrect!=0) {
+//             if (RotateCorrect > 3)//should i add a while loop??????
+//             {
+//                 rotate(.3, RotateCorrect * -1);
+//             }
+//             if (RotateCorrect < -3) {
+//                 rotate(.3, RotateCorrect);
+//             }
              //Diagonal travel
              if (distance != 0) {
                  if (X < 0 && Y > 0) {
-                     splineFL2(.3, distance);
+                     splineFL2(.3, distance);//this doesnt work
                  }
                  if (X < 0 && Y < 0) {
-                     splineBL(.3, distance);
+                     splineFR(.3, distance);//BL
                  }
                  if (X > 0 && Y < 0) {
-                     splineFR(.3, distance);
+                     splineBL(.3, distance);//FR
                  }
                  if (X > 0 && Y > 0) {
                      splineBR(.3, distance);
                  }
 
              }
+             //if (RotateCorrect > 3)//should i add a while loop??????
+//             {
+//                 rotate(.3, RotateCorrect * -1);
+//             }
+//             if (RotateCorrect < -3) {
+//                 rotate(.3, RotateCorrect);
+//             }
              //no Diagonal travel
              else {
                  if (X < 0) {
@@ -905,7 +914,7 @@
                      driveBackwardIMU(.3, Y * -1);
                  }
 
-             }
+        //     }
          }
 
      }
